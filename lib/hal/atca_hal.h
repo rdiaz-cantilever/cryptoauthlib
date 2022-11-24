@@ -63,7 +63,8 @@ ATCA_STATUS hal_iface_release(ATCAIfaceType, void* hal_data);
 ATCA_STATUS hal_check_wake(const uint8_t* response, int response_size);
 
 #ifdef ATCA_HAL_I2C
-ATCA_STATUS hal_i2c_init(ATCAIface iface, ATCAIfaceCfg *cfg);
+// ATCA_STATUS hal_i2c_init(ATCAIface iface, ATCAIfaceCfg *cfg);
+ATCA_STATUS hal_i2c_init(void *hal, ATCAIfaceCfg *cfg);
 ATCA_STATUS hal_i2c_post_init(ATCAIface iface);
 ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t word_address, uint8_t *txdata, int txlength);
 ATCA_STATUS hal_i2c_receive(ATCAIface iface, uint8_t word_address, uint8_t *rxdata, uint16_t *rxlength);

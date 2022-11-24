@@ -44,19 +44,19 @@ ATCAIfaceCfg cfg_ateccx08a_i2c_default = {
     .devtype                    = ATECC608,
     {
 #ifdef ATCA_ENABLE_DEPRECATED
-        .atcai2c.slave_address  = 0xC0,
+        .atcai2c.slave_address  = 0x6C,
 #else
-        .atcai2c.address        = 0xC0,
+        .atcai2c.address        = 0x6C,
 #endif
-        .atcai2c.bus            = 2,
+        .atcai2c.bus            = 0,
 #ifdef __linux__
         .atcai2c.baud           = 100000,
 #else
-        .atcai2c.baud           = 400000,
+        .atcai2c.baud           = 100000,
 #endif
     },
     .wake_delay                 = 1500,
-    .rx_retries                 = 20
+    .rx_retries                 = 20,
 };
 #endif
 

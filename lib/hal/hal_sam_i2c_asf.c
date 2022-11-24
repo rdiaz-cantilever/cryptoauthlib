@@ -35,13 +35,14 @@
 #include <stdio.h>
 #include "cryptoauthlib.h"
 #include "hal_sam_i2c_asf.h"
+#include "util_module.h"
 
 #ifndef ATCA_HAL_LEGACY_API
 #error "The use of this hal requires the ATCA_HAL_LEGACY_API option to be enabled.
 #endif
 
 //!< Uncomment when debugging
-/*#define DEBUG_HAL*/
+// #define DEBUG_HAL
 
 /**
  * \defgroup hal_ Hardware abstraction layer (hal_)
@@ -101,6 +102,7 @@ ATCA_STATUS hal_i2c_discover_devices(int bus_num, ATCAIfaceCfg cfg[], int *found
  * \return ATCA_SUCCESS on success, otherwise an error code.
  */
 ATCA_STATUS hal_i2c_init(void *hal, ATCAIfaceCfg *cfg)
+// ATCA_STATUS hal_i2c_init(ATCAIface iface, ATCAIfaceCfg *cfg)
 {
     return ATCA_SUCCESS;
 }
@@ -132,6 +134,7 @@ ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t word_address, uint8_t *txdata,
     ATCAIfaceCfg *cfg = atgetifacecfg(iface);
     Twi * i2c_master_instance;
     i2c_sam_instance_t * plib;
+	uint32_t twi_status = 0;
 
     twi_packet_t packet = {
         .chip        = cfg->atcai2c.slave_address >> 1,
@@ -168,7 +171,7 @@ ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t word_address, uint8_t *txdata,
 
     if (0xFF != word_address)
     {
-        txdata[0] = word_address;   // insert the Word Address Value, Command token
+        //txdata[0] = word_address;   // insert the Word Address Value, Command token
         txlength++;                 // account for word address value byte.
     }
 
@@ -179,7 +182,9 @@ ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t word_address, uint8_t *txdata,
     // other device types that don't require i/o tokens on the front end of a command need a different hal_i2c_send and wire it up instead of this one
     // this covers devices such as ATSHA204A and ATECCx08A that require a word address value pre-pended to the packet
 
-    if (twi_master_write(i2c_master_instance, &packet) != TWI_SUCCESS)
+	twi_status = twi_master_write(i2c_master_instance, &packet);
+	// hex_dump(packet.buffer, packet.length);
+    if (twi_status != TWI_SUCCESS)
     {
         return ATCA_COMM_FAIL;
     }
@@ -336,6 +341,15 @@ ATCA_STATUS hal_i2c_wake(ATCAIface iface)
     uint8_t data[4];
     Twi * i2c_master_instance;
     i2c_sam_instance_t * plib;
+	uint8_t zero_wake[1] = {0x00};
+	
+	twi_packet_t packet_tx = {
+		.chip        = 0x00,
+		.addr        = { 0 },
+		.addr_length = 0,
+		.buffer      = zero_wake,
+		.length      = (uint32_t)1 //(uint32_t)txdata[1]
+	};
 
     if (!cfg)
     {
@@ -363,9 +377,24 @@ ATCA_STATUS hal_i2c_wake(ATCAIface iface)
         plib->change_baudrate(iface, 100000);
     }
 
-
+    /**Routine to write a simple 0x00**/
+    //twi_enable_master_mode(i2c_master_instance);
+	//i2c_master_instance->TWI_MMR = 0;
+    
     // Send 0x00 as wake pulse
-    twi_write_byte(i2c_master_instance, 0x00);
+    //twi_write_byte(i2c_master_instance, 0x00);
+	// hex_dump(packet.buffer, packet.length);
+	if (twi_master_write(i2c_master_instance, &packet_tx) != TWI_SUCCESS)
+	{
+		//status = !TWI_SUCCESS
+	}
+	else
+	{
+		//status = TWI_SUCCESS;
+	}
+
+	
+	//i2c_master_instance->TWI_CR = TWI_CR_STOP;
 
     // rounded up to the nearest ms
     atca_delay_ms(((uint32_t)cfg->wake_delay + (1000 - 1)) / 1000);   // wait tWHI + tWLO which is configured based on device type and configuration structure
