@@ -44,7 +44,7 @@ ATCAIfaceCfg cfg_ateccx08a_i2c_default = {
     .devtype                    = ATECC608,
     {
 #ifdef ATCA_ENABLE_DEPRECATED
-        .atcai2c.slave_address  = 0x6C,
+        .atcai2c.slave_address  = 0x6C, //0x6C
 #else
         .atcai2c.address        = 0x6C,
 #endif

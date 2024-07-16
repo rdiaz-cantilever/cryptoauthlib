@@ -348,7 +348,7 @@ ATCA_STATUS hal_i2c_wake(ATCAIface iface)
 		.addr        = { 0 },
 		.addr_length = 0,
 		.buffer      = zero_wake,
-		.length      = (uint32_t)1 //(uint32_t)txdata[1]
+		.length      = (uint32_t)1,
 	};
 
     if (!cfg)
@@ -377,13 +377,8 @@ ATCA_STATUS hal_i2c_wake(ATCAIface iface)
         plib->change_baudrate(iface, 100000);
     }
 
-    /**Routine to write a simple 0x00**/
-    //twi_enable_master_mode(i2c_master_instance);
-	//i2c_master_instance->TWI_MMR = 0;
-    
     // Send 0x00 as wake pulse
-    //twi_write_byte(i2c_master_instance, 0x00);
-	// hex_dump(packet.buffer, packet.length);
+
 	if (twi_master_write(i2c_master_instance, &packet_tx) != TWI_SUCCESS)
 	{
 		//status = !TWI_SUCCESS
@@ -392,9 +387,6 @@ ATCA_STATUS hal_i2c_wake(ATCAIface iface)
 	{
 		//status = TWI_SUCCESS;
 	}
-
-	
-	//i2c_master_instance->TWI_CR = TWI_CR_STOP;
 
     // rounded up to the nearest ms
     atca_delay_ms(((uint32_t)cfg->wake_delay + (1000 - 1)) / 1000);   // wait tWHI + tWLO which is configured based on device type and configuration structure
